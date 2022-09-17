@@ -3,6 +3,7 @@ package com.code.productservice.service;
 import com.code.productservice.DTO.ProductDto;
 import com.code.productservice.DTO.ProductResponse;
 import com.code.productservice.Entity.Product;
+import com.code.productservice.exception.ProductServiceCustomException;
 import com.code.productservice.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +53,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse getProductById(Long productId) {
-        log.info("Get the product for productId: {}" , productId);
+        log.info("Get the product for productId: {}", productId);
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product with given id not found"));
+                .orElseThrow(() -> new ProductServiceCustomException("Product with given id not found", "PRODUCT_NOT_FOUND"));
         ProductResponse productResponse = new ProductResponse();
 
         copyProperties(product, productResponse);// BeanUtils.copyProperties - imported static to look clean here
