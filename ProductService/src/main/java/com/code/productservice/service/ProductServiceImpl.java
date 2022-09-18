@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.beans.BeanUtils.copyProperties;
@@ -61,5 +62,27 @@ public class ProductServiceImpl implements ProductService {
         copyProperties(product, productResponse);// BeanUtils.copyProperties - imported static to look clean here
 
         return productResponse;
+    }
+
+    @Override
+    public void reduceQuantity(long productId, long quantity) {
+        log.info("Reduce Quantity {} for Id: {}", quantity, productId);
+
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductServiceCustomException(
+                "Product with given id is not found",
+                "PRODUCT_NOT_FOUND"
+        ));
+
+        if(product.getQuantity() < quantity) {
+            throw new ProductServiceCustomException(
+                    "Product does not have sufficient quantity",
+                    "INSUFFICIENT_QUANTITY"
+            );
+        }
+
+        product.setQuantity(product.getQuantity() - quantity);
+        productRepository.save(product);
+
+        log.info("Product Quantity updated Successfully");
     }
 }
