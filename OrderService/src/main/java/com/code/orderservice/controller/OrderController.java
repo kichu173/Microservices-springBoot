@@ -1,15 +1,13 @@
 package com.code.orderservice.controller;
 
+import com.code.orderservice.model.OrderResponse;
 import com.code.orderservice.model.OrderRequest;
 import com.code.orderservice.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/order")
@@ -24,5 +22,11 @@ public class OrderController {
         Long orderId = orderservice.placeOrder(orderRequest);
         log.info("Order Id: {}", orderId);
         return new ResponseEntity<>(orderId, HttpStatus.OK);
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponse> getOrderDetails(@PathVariable Long orderId) {
+        OrderResponse orderResponse = orderservice.getOrderDetails(orderId);
+        return new ResponseEntity<>(orderResponse, HttpStatus.OK);
     }
 }
