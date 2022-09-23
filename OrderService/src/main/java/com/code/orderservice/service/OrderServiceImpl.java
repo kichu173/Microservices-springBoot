@@ -96,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
         log.info("Getting payment information from the payment Service");
 
         PaymentResponse paymentResponse =restTemplate.getForObject(
-                "http://PAYMENT-SERVICE/payment/order" + orderId,
+                "http://PAYMENT-SERVICE/payment/order/" + orderId,
                 PaymentResponse.class
         );
 

@@ -17,7 +17,7 @@ import java.time.Instant;
 public class PaymentServiceImpl implements PaymentService{
 
     @Autowired
-    private TransactionDetailsRepository repository;
+    private TransactionDetailsRepository transactionDetailsRepository;
 
     @Override
     public Long doPayment(PaymentRequest paymentRequest) {
@@ -32,7 +32,7 @@ public class PaymentServiceImpl implements PaymentService{
                 .amount(paymentRequest.getAmount())
                 .build();
 
-        repository.save(transactionDetails);
+        transactionDetailsRepository.save(transactionDetails);
         log.info("transaction completed with Id; {}", transactionDetails.getId());
 
         return transactionDetails.getId();
@@ -42,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService{
     public PaymentResponse getPaymentDetailsByOrderId(Long orderId) {
         log.info("Getting payment details for the Order Id: {}", orderId);
 
-        TransactionDetails transactionDetails = repository.findByOrderId(orderId);
+        TransactionDetails transactionDetails = transactionDetailsRepository.findByOrderId(orderId);
 
         if (transactionDetails == null) {
             log.error("Order Id: {} is not found ", orderId);
