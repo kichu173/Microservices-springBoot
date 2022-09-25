@@ -1,0 +1,109 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: API-GATEWAY
+  config: #common configurations connecting to service discovery/registry from config server (added dependency spring cloud config)
+    import: configserver:http://localhost:9296
+  cloud: #configuration for api gateway(all traffics coming to api gateway and from api gateway we can understand to which particular service traffic should be routed to)
+    gateway:
+      routes:
+        - id : ORDER-SERVICE
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order/**
+          filters: #configuration for circuit breaker(resilience 4j)
+            - name: CircuitBreaker
+              args:
+                name: ORDER-SERVICE
+                fallbackuri: forward:/orderServiceFallBack
+            - name: RequestRateLimiter #configuration for rate limiter
+              args: #replenishRate - How many req should be allowed per sec
+                redis-rate-limiter.replenishRate: 1
+                redis-rate-limiter.burstCapacity: 1 #burstCapacity - How many request should be allowed in that particular 1 duration sec
+        - id: PAYMENT-SERVICE
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/payment/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: PAYMENT-SERVICE
+                fallbackuri: forward:/paymentServiceFallBack
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 1
+                redis-rate-limiter.burstCapacity: 1
+        - id: PRODUCT-SERVICE
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/product/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: PRODUCT-SERVICE
+                fallbackuri: forward:/productServiceFallBack
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 1
+                redis-rate-limiter.burstCapacity: 1
+
+okta: #configuration for authentication server(okta)
+  oauth2:
+    issuer: https://dev-82825943.okta.com/oauth2/default
+    audience: api://default
+    client-id: 0oa6mx4du8b5cEfu05d7
+    client-secret: 0MlVcTXkxj1Hf7eU3p-GoHwnqyl8gmmvuyU8f_Xq
+    scopes: openid, email, profile, offline_access
+
+
+#  server.port=9090
+#
+#  spring.application.name=API-GATEWAY
+#  #common configurations connecting to service discovery/registry from config server (added dependency spring cloud config)
+#  spring.config.import=configserver:http://localhost:9296
+#
+#  #configuration for api gateway(all traffics coming to api gateway and from api gateway we can understand to which particular service traffic should be routed to)
+#  spring.cloud.gateway.routes[0].id=ORDER-SERVICE
+#  spring.cloud.gateway.routes[0].uri=lb://ORDER-SERVICE
+#  spring.cloud.gateway.routes[0].predicates[0]=Path=/order/**
+#  #configuration for circuit breaker(resilience 4j)
+#  spring.cloud.gateway.routes[0].filters[0].name=CircuitBreaker
+#  spring.cloud.gateway.routes[0].filters[0].args.name=ORDER-SERVICE
+#  spring.cloud.gateway.routes[0].filters[0].args.fallbackuri=forward:/orderServiceFallBack
+#  #configuration for rate limiter
+#  spring.cloud.gateway.routes[0].filters[1].name=RequestRateLimiter
+#  spring.cloud.gateway.routes[0].filters[1].args.redis-rate-limiter.replenishRate=1
+#  spring.cloud.gateway.routes[0].filters[1].args.redis-rate-limiter.burstCapacity=1
+#
+#  spring.cloud.gateway.routes[1].id=PRODUCT-SERVICE
+#  spring.cloud.gateway.routes[1].uri=lb://PRODUCT-SERVICE
+#  spring.cloud.gateway.routes[1].predicates[0]=Path=/product/**
+#  #configuration for circuit breaker(resilience 4j)
+#  spring.cloud.gateway.routes[1].filters[0].name=CircuitBreaker
+#  spring.cloud.gateway.routes[1].filters[0].args.name=PRODUCT-SERVICE
+#  spring.cloud.gateway.routes[1].filters[0].args.fallbackuri=forward:/productServiceFallBack
+#  spring.cloud.gateway.routes[1].filters[1].name=RequestRateLimiter
+#  #replenishRate - How many req should be allowed per sec
+#  spring.cloud.gateway.routes[1].filters[1].args.redis-rate-limiter.replenishRate=1
+#  #burstCapacity - How many request should be allowed in that particular 1 duration sec
+#  spring.cloud.gateway.routes[1].filters[1].args.redis-rate-limiter.burstCapacity=1
+#
+#  spring.cloud.gateway.routes[2].id=PAYMENT-SERVICE
+#  spring.cloud.gateway.routes[2].uri=lb://PAYMENT-SERVICE
+#  spring.cloud.gateway.routes[2].predicates[0]=Path=/payment/**
+#  #configuration for circuit breaker(resilience 4j)
+#  spring.cloud.gateway.routes[2].filters[0].name=CircuitBreaker
+#  spring.cloud.gateway.routes[2].filters[0].args.name=PAYMENT-SERVICE
+#  spring.cloud.gateway.routes[2].filters[0].args.fallbackuri=forward:/paymentServiceFallBack
+#  spring.cloud.gateway.routes[2].filters[1].name=RequestRateLimiter
+#  spring.cloud.gateway.routes[2].filters[1].args.redis-rate-limiter.replenishRate=1
+#  spring.cloud.gateway.routes[2].filters[1].args.redis-rate-limiter.burstCapacity=1
+#
+#  #configuration for authentication server(okta)
+#  okta.oauth2.issuer=https://dev-82825943.okta.com/oauth2/default
+#  okta.oauth2.audience=api://default
+#  okta.oauth2.client-id=0oa6mx4du8b5cEfu05d7
+#  okta.oauth2.client-secret=0MlVcTXkxj1Hf7eU3p-GoHwnqyl8gmmvuyU8f_Xq
+#  okta.oauth2.scopes=openid, profile, email, offline_access
