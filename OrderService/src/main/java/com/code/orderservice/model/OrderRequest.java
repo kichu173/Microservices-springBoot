@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class OrderRequest {
-    private long productId;
-    private long totalAmount;
-    private long quantity;
+    private Long productId;
+    private Long totalAmount;
+    private Long quantity;
     private PaymentMode paymentMode;
 }
